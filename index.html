@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全加密对话工具 | Secure Chat Encryptor</title>
+    <meta name="description" content="端到端加密消息工具，保护您的隐私安全">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1><i class="fas fa-lock"></i> 安全加密对话工具</h1>
+            <p class="subtitle">端到端加密 • 零知识架构 • 军事级安全</p>
+        </header>
+
+        <!-- 密钥管理区域 -->
+        <div class="card key-manager">
+            <h2><i class="fas fa-key"></i> 密钥管理</h2>
+            <div class="key-controls">
+                <button id="generateKeys" class="btn btn-primary">
+                    <i class="fas fa-key"></i> 生成新密钥对
+                </button>
+                <button id="exportKeys" class="btn btn-secondary">
+                    <i class="fas fa-download"></i> 导出密钥
+                </button>
+                <button id="importKeys" class="btn btn-secondary">
+                    <i class="fas fa-upload"></i> 导入密钥
+                </button>
+                <button id="clearKeys" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> 清除所有密钥
+                </button>
+            </div>
+            <div class="key-status">
+                <p id="keyStatus">状态: <span class="status-badge">未检测到密钥</span></p>
+                <div id="keyStrengthIndicator" style="margin-top: 10px; display: none;">
+                    <label><i class="fas fa-shield-alt"></i> 密钥强度:</label>
+                    <div class="strength-bar-container" style="margin-top: 8px;">
+                        <div id="strengthBar" class="strength-bar" style="height: 8px; border-radius: 4px; background: #e0e0e0;"></div>
+                    </div>
+                    <p id="strengthText" class="strength-text" style="margin-top: 5px; font-size: 14px; font-weight: 600;"></p>
+                </div>
+                <p id="keyFingerprint" class="fingerprint"></p>
+                <div id="publicKeyDisplay" style="margin-top: 10px; display: none;">
+                    <label><i class="fas fa-key"></i> 您的公钥 (用于分享):</label>
+                    <div style="display: flex; gap: 10px; align-items: flex-start; margin-top: 5px;">
+                        <textarea id="publicKeyText" readonly rows="5" style="flex: 1; font-family: 'Courier New', Courier, monospace; font-size: 12px; padding: 8px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
+                        <button id="copyPublicKey" class="btn btn-small btn-secondary" style="margin-top: 0;align-self: flex-start;">
+                            <i class="fas fa-copy"></i> 复制
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加密解密并排区域 -->
+        <div class="encryption-decryption-container">
+            <!-- 加密区域 -->
+            <div class="card encryption-area">
+                <h2><i class="fas fa-shield-alt"></i> 加密消息</h2>
+                <div class="input-group">
+                    <label for="plaintext"><i class="fas fa-edit"></i> 输入明文消息:</label>
+                    <textarea id="plaintext" placeholder="输入您要加密的消息..." rows="4"></textarea>
+                </div>
+                
+                <div class="input-group">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label for="recipientKey"><i class="fas fa-user"></i> 接收方公钥 (可选):</label>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="cleanPublicKey" class="btn btn-small btn-secondary">
+                            <i class="fas fa-broom"></i> 清理格式
+                        </button>
+                        <button id="clearPublicKey" class="btn btn-small btn-danger">
+                            <i class="fas fa-times"></i> 清除
+                        </button>
+                    </div>
+                </div>
+                <textarea id="recipientKey" placeholder="粘贴接收方的公钥，如留空则生成分享链接..." rows="3"></textarea>
+                <div id="recipientKeyStatus" style="margin-top: 5px; font-size: 12px; color: #666;"></div>
+            </div>
+
+                <div class="button-group">
+                    <button id="encryptBtn" class="btn btn-primary">
+                        <i class="fas fa-lock"></i> 加密消息
+                    </button>
+                    <button id="generateShareLink" class="btn btn-success">
+                        <i class="fas fa-link"></i> 生成分享链接
+                    </button>
+                </div>
+
+                <div class="output-group">
+                    <label for="ciphertext"><i class="fas fa-file-code"></i> 加密结果:</label>
+                    <textarea id="ciphertext" readonly placeholder="加密后的消息将显示在这里..." rows="4"></textarea>
+                    <button id="copyEncrypted" class="btn btn-small">
+                        <i class="fas fa-copy"></i> 复制
+                    </button>
+                </div>
+            </div>
+
+            <!-- 解密区域 -->
+            <div class="card decryption-area">
+                <h2><i class="fas fa-unlock"></i> 解密消息</h2>
+                <div class="input-group">
+                    <label for="encryptedMessage"><i class="fas fa-envelope"></i> 输入加密消息:</label>
+                    <textarea id="encryptedMessage" placeholder="粘贴加密消息或分享链接..." rows="4"></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button id="decryptBtn" class="btn btn-primary">
+                        <i class="fas fa-unlock"></i> 解密消息
+                    </button>
+                    <button id="pasteFromClipboard" class="btn btn-secondary">
+                        <i class="fas fa-paste"></i> 从剪贴板粘贴
+                    </button>
+                </div>
+
+                <div class="output-group">
+                    <label for="decryptedText"><i class="fas fa-check-circle"></i> 解密结果:</label>
+                    <textarea id="decryptedText" readonly placeholder="解密后的消息将显示在这里..." rows="4"></textarea>
+                    <button id="copyDecrypted" class="btn btn-small">
+                        <i class="fas fa-copy"></i> 复制
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使用指南 -->
+        <div class="card usage-guide">
+            <h2><i class="fas fa-book-open"></i> 使用指南</h2>
+            
+            <div class="guide-steps">
+                <h3><i class="fas fa-user-friends"></i> 密钥交换流程</h3>
+                <ol class="step-list">
+                    <li><strong>生成密钥</strong>：点击「生成新密钥对」，获得您的公钥和私钥</li>
+                    <li><strong>分享公钥</strong>：复制页面上显示的「您的公钥」，通过安全渠道发送给聊天对象</li>
+                    <li><strong>接收公钥</strong>：将对方分享的公钥粘贴到「接收方公钥」文本框</li>
+                </ol>
+                
+                <h3><i class="fas fa-paper-plane"></i> 发送加密消息</h3>
+                <ol class="step-list">
+                    <li><strong>输入消息</strong>：在「输入明文消息」框中输入您要发送的内容</li>
+                    <li><strong>选择公钥</strong>：确保「接收方公钥」框中已填入对方的公钥</li>
+                    <li><strong>加密消息</strong>：点击「加密消息」按钮，生成密文</li>
+                    <li><strong>分享密文</strong>：
+                        <ul>
+                            <li>方式1：复制「加密结果」文本框中的内容，发送给对方</li>
+                            <li>方式2：点击「生成分享链接」，复制链接发送给对方（推荐）</li>
+                        </ul>
+                    </li>
+                </ol>
+                
+                <h3><i class="fas fa-inbox"></i> 接收解密消息</h3>
+                <ol class="step-list">
+                    <li><strong>获取密文</strong>：
+                        <ul>
+                            <li>方式1：直接从对方获取密文，粘贴到「输入加密消息」框</li>
+                            <li>方式2：打开对方分享的链接（密文会自动填充）</li>
+                        </ul>
+                    </li>
+                    <li><strong>解密消息</strong>：点击「解密消息」按钮</li>
+                    <li><strong>查看结果</strong>：在「解密结果」框中查看原始消息</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- 安全指示器 -->
+        <div class="card security-info">
+            <h2><i class="fas fa-shield-check"></i> 安全状态</h2>
+            <div class="security-indicators">
+                <div class="indicator active">
+                    <i class="fas fa-check-circle"></i>
+                    <span>端到端加密</span>
+                </div>
+                <div class="indicator active">
+                    <i class="fas fa-check-circle"></i>
+                    <span>浏览器内加密</span>
+                </div>
+                <div class="indicator active">
+                    <i class="fas fa-check-circle"></i>
+                    <span>密钥本地存储</span>
+                </div>
+                <div class="indicator active">
+                    <i class="fas fa-check-circle"></i>
+                    <span>前向保密</span>
+                </div>
+            </div>
+            
+            <div class="security-tips">
+                <h3><i class="fas fa-lightbulb"></i> 安全提示</h3>
+                <ul>
+                    <li>🔒 所有加密解密操作都在您的浏览器中完成</li>
+                    <li>🔑 密钥存储在您的设备上，不会发送到服务器</li>
+                    <li>📱 建议定期备份和导出您的密钥</li>
+                    <li>🚫 切勿在公共设备上保存您的私钥</li>
+                    <li>🔗 通过安全渠道分享公钥和加密消息</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载指示器 -->
+    <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">处理中...</div>
+    </div>
+
+    <!-- Toast通知容器 -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- 消息历史记录面板 -->
+    <div id="historyPanel" class="history-panel">
+        <div class="history-header">
+            <h3><i class="fas fa-history"></i> 消息历史</h3>
+            <button id="closeHistory" class="btn btn-small btn-secondary"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="historyContent" class="history-content"></div>
+    </div>
+
+    <!-- 主题切换按钮 -->
+    <button id="themeToggle" class="theme-toggle" aria-label="切换主题">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <script src="script.js"></script>
+</body>
+</html>
