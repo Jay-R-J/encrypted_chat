@@ -39,7 +39,7 @@
 ## 🚀 快速开始
 
 ### 在线使用
-访问 [http://localhost:8000](http://localhost:8000) 开始使用。
+访问 [https://jay-r-j.github.io/encrypted_chat/](https://jay-r-j.github.io/encrypted_chat/) 开始使用。
 
 ### 本地部署
 1. 克隆或下载项目文件
